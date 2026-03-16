@@ -7,6 +7,7 @@ const BusinessDetail = () => {
   const [newReview, setNewReview] = useState({ rating: 5, comment: '' });
 
   // Mock business data - in real app, fetch by ID
+  // Mock business data - in real app, fetch by ID
   const business = {
     id: 1,
     name: "Mario's Italian Restaurant",
