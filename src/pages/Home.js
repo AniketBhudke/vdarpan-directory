@@ -1,17 +1,15 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 const Home = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [location, setLocation] = useState('');
   const [category, setCategory] = useState('');
-  const navigate = useNavigate();
 
   const handleSearch = (e) => {
     e.preventDefault();
     const query = searchQuery || category;
     if (query.trim()) {
-      navigate(`/search?q=${encodeURIComponent(query)}&location=${encodeURIComponent(location)}&category=${encodeURIComponent(category)}`);
+      alert(`Searching for: ${query} in ${location || 'all locations'}`);
     }
   };
 
@@ -88,11 +86,11 @@ const Home = () => {
   ];
 
   const handleCategoryClick = (categoryName) => {
-    navigate(`/search?q=${encodeURIComponent(categoryName)}&category=${encodeURIComponent(categoryName)}`);
+    alert(`Browsing ${categoryName} category`);
   };
 
   const handleBusinessClick = (businessId) => {
-    navigate(`/business/${businessId}`);
+    alert(`Viewing business details for ID: ${businessId}`);
   };
 
   return (
@@ -149,7 +147,7 @@ const Home = () => {
                   key={index}
                   onClick={() => {
                     setSearchQuery(search);
-                    navigate(`/search?q=${encodeURIComponent(search)}&location=${encodeURIComponent(location)}`);
+                    alert(`Searching for: ${search}`);
                   }}
                   className="vd-popular-tag"
                 >
@@ -195,7 +193,7 @@ const Home = () => {
         <div className="vd-container">
           <div className="vd-section-header">
             <h2 className="vd-section-title">Trending Businesses</h2>
-            <button className="vd-view-all" onClick={() => navigate('/search')}>
+            <button className="vd-view-all" onClick={() => alert('View all businesses')}>
               View All <i className="fas fa-arrow-right"></i>
             </button>
           </div>
@@ -220,7 +218,7 @@ const Home = () => {
                       </button>
                       <button className="vd-action-btn direction" onClick={(e) => {
                         e.stopPropagation();
-                        // Add directions functionality
+                        alert('Opening directions...');
                       }}>
                         <i className="fas fa-directions"></i>
                       </button>
@@ -335,7 +333,10 @@ const Home = () => {
             </div>
             <h3>Stay Updated with VDarpan</h3>
             <p>Sign up to receive email updates about new businesses and exclusive deals in your area.</p>
-            <form className="vd-newsletter-form">
+            <form className="vd-newsletter-form" onSubmit={(e) => {
+              e.preventDefault();
+              alert('Thank you for subscribing!');
+            }}>
               <input 
                 type="email" 
                 placeholder="Enter your email address..." 
