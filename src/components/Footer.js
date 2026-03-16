@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 
 const Footer = () => {
   const popularCategories = [
@@ -37,7 +36,10 @@ const Footer = () => {
             <ul>
               {popularCategories.map((category, index) => (
                 <li key={index}>
-                  <Link to={`/search?q=${encodeURIComponent(category)}`}>{category}</Link>
+                  <a href="#" onClick={(e) => {
+                    e.preventDefault();
+                    alert(`Browsing ${category} category`);
+                  }}>{category}</a>
                 </li>
               ))}
             </ul>
@@ -48,7 +50,10 @@ const Footer = () => {
             <ul>
               {locations.map((location, index) => (
                 <li key={index}>
-                  <Link to={`/search?location=${encodeURIComponent(location)}`}>{location}</Link>
+                  <a href="#" onClick={(e) => {
+                    e.preventDefault();
+                    alert(`Searching in ${location}`);
+                  }}>{location}</a>
                 </li>
               ))}
             </ul>
@@ -59,9 +64,12 @@ const Footer = () => {
             <ul>
               {importantLinks.map((link, index) => (
                 <li key={index}>
-                  <Link to={link === 'Home' ? '/' : `/${link.toLowerCase().replace(/\s+/g, '-')}`}>
+                  <a href="#" onClick={(e) => {
+                    e.preventDefault();
+                    alert(`Navigating to ${link}`);
+                  }}>
                     {link}
-                  </Link>
+                  </a>
                 </li>
               ))}
             </ul>
@@ -81,9 +89,18 @@ const Footer = () => {
         
         <div className="vd-footer-bottom">
           <div className="vd-footer-links">
-            <Link to="/terms">Terms & Condition</Link>
-            <Link to="/privacy">Privacy Policy</Link>
-            <Link to="/about">About Us</Link>
+            <a href="#" onClick={(e) => {
+              e.preventDefault();
+              alert('Terms & Conditions');
+            }}>Terms & Condition</a>
+            <a href="#" onClick={(e) => {
+              e.preventDefault();
+              alert('Privacy Policy');
+            }}>Privacy Policy</a>
+            <a href="#" onClick={(e) => {
+              e.preventDefault();
+              alert('About Us');
+            }}>About Us</a>
           </div>
         </div>
       </div>
