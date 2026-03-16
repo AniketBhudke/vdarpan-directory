@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
 
 const Header = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -7,13 +6,12 @@ const Header = () => {
   const [category, setCategory] = useState('');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showLoginDropdown, setShowLoginDropdown] = useState(false);
-  const navigate = useNavigate();
 
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim() || category) {
       const query = searchQuery || category;
-      navigate(`/search?q=${encodeURIComponent(query)}&location=${encodeURIComponent(location)}&category=${encodeURIComponent(category)}`);
+      alert(`Searching for: ${query} in ${location || 'all locations'}`);
     }
   };
 
@@ -32,25 +30,25 @@ const Header = () => {
     <header className="vd-header">
       <nav className="vd-navbar">
         <div className="vd-nav-container">
-          <Link to="/" className="vd-nav-logo">
+          <a href="#" className="vd-nav-logo">
             <div className="vd-logo">
               <span className="vd-logo-v">V</span>
               <span className="vd-logo-d">D</span>
             </div>
-          </Link>
+          </a>
 
           <ul className={`vd-nav-menu ${isMenuOpen ? 'active' : ''}`}>
             <li className="vd-nav-item">
-              <Link to="/" className="vd-nav-link">Home</Link>
+              <a href="#" className="vd-nav-link">Home</a>
             </li>
             <li className="vd-nav-item">
-              <Link to="/free-listing" className="vd-nav-link">Free Listing</Link>
+              <a href="#" className="vd-nav-link">Free Listing</a>
             </li>
             <li className="vd-nav-item dropdown">
               <span className="vd-nav-link">Pages <i className="fas fa-chevron-down"></i></span>
             </li>
             <li className="vd-nav-item">
-              <Link to="/contact" className="vd-nav-link">Contact Us</Link>
+              <a href="#" className="vd-nav-link">Contact Us</a>
             </li>
           </ul>
 
@@ -69,7 +67,7 @@ const Header = () => {
                 </div>
               )}
             </div>
-            <Link to="/advertise" className="vd-advertise-btn">Advertise</Link>
+            <a href="#" className="vd-advertise-btn">Advertise</a>
           </div>
 
           <div className={`vd-nav-toggle ${isMenuOpen ? 'active' : ''}`} onClick={toggleMenu}>
