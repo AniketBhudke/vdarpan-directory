@@ -3,10 +3,42 @@ const fs = require('fs');
 const path = require('path');
 
 const PORT = process.env.PORT || 3000;
-const DIST_DIR = path.join(__dirname, 'build');
+
+// Try multiple possible build directory locations
+const buildPaths = [
+  path.join(__dirname, 'build'),
+  path.join(process.cwd(), 'build'),
+  '/app/build',
+  '/opt/render/project/build'
+];
+
+let DIST_DIR = buildPaths.find(p => fs.existsSync(p));
+
+if (!DIST_DIR) {
+  console.error('Build folder not found in any expected location:');
+  buildPaths.forEach(p => console.error(`  - ${p}`));
+  process.exit(1);
+}
+
+console.log(`Server starting. Using DIST_DIR: ${DIST_DIR}`);
 
 const server = http.createServer((req, res) => {
-  let filePath = path.join(DIST_DIR, req.url === '/' ? 'index.html' : req.url);
+  // Remove trailing slash and search params
+  let urlPath = req.url.split('?')[0];
+  if (urlPath !== '/' && urlPath.endsWith('/')) {
+    urlPath = urlPath.slice(0, -1);
+  }
+
+  let filePath = urlPath === '/' 
+    ? path.join(DIST_DIR, 'index.html')
+    : path.join(DIST_DIR, urlPath);
+
+  // Prevent directory traversal attacks
+  if (!filePath.startsWith(DIST_DIR)) {
+    filePath = path.join(DIST_DIR, 'index.html');
+  }
+
+  console.log(`Request: ${req.url} -> ${filePath}`);
   const ext = path.extname(filePath).toLowerCase();
   
   // Set MIME types
