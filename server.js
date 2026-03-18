@@ -3,76 +3,81 @@ const fs = require('fs');
 const path = require('path');
 
 const PORT = process.env.PORT || 3000;
+const DIST_DIR = path.join(__dirname, 'build');
 
-// Try multiple possible build directory locations
-const buildPaths = [
-  path.join(__dirname, 'build'),
-  path.join(process.cwd(), 'build'),
-  '/app/build',
-  '/opt/render/project/build'
-];
+console.log(`=== Server Starting ===`);
+console.log(`PORT: ${PORT}`);
+console.log(`DIST_DIR: ${DIST_DIR}`);
+console.log(`DIST_DIR exists: ${fs.existsSync(DIST_DIR)}`);
 
-let DIST_DIR = buildPaths.find(p => fs.existsSync(p));
-
-if (!DIST_DIR) {
-  console.error('Build folder not found in any expected location:');
-  buildPaths.forEach(p => console.error(`  - ${p}`));
+if (!fs.existsSync(DIST_DIR)) {
+  console.error(`ERROR: Build directory not found at ${DIST_DIR}`);
+  console.error(`Current directory: ${process.cwd()}`);
+  console.error(`__dirname: ${__dirname}`);
+  console.error(`Contents of current directory:`);
+  fs.readdirSync('.').forEach(f => console.error(`  - ${f}`));
   process.exit(1);
 }
 
-console.log(`Server starting. Using DIST_DIR: ${DIST_DIR}`);
+const MIME_TYPES = {
+  '.html': 'text/html',
+  '.js': 'application/javascript',
+  '.css': 'text/css',
+  '.json': 'application/json',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.gif': 'image/gif',
+  '.svg': 'image/svg+xml',
+  '.ico': 'image/x-icon',
+  '.woff': 'font/woff',
+  '.woff2': 'font/woff2',
+  '.ttf': 'font/ttf',
+  '.eot': 'application/vnd.ms-fontobject'
+};
 
 const server = http.createServer((req, res) => {
-  // Remove trailing slash and search params
-  let urlPath = req.url.split('?')[0];
-  if (urlPath !== '/' && urlPath.endsWith('/')) {
-    urlPath = urlPath.slice(0, -1);
-  }
-
-  let filePath = urlPath === '/' 
-    ? path.join(DIST_DIR, 'index.html')
-    : path.join(DIST_DIR, urlPath);
-
-  // Prevent directory traversal attacks
+  // Clean the request URL
+  const urlPath = req.url.split('?')[0];
+  const isStatic = /\.[a-z0-9]+$/i.test(urlPath);
+  
+  let filePath = path.join(DIST_DIR, urlPath === '/' ? 'index.html' : urlPath);
+  
+  // Prevent directory traversal
   if (!filePath.startsWith(DIST_DIR)) {
     filePath = path.join(DIST_DIR, 'index.html');
   }
 
-  console.log(`Request: ${req.url} -> ${filePath}`);
-  const ext = path.extname(filePath).toLowerCase();
-  
-  // Set MIME types
-  const mimeTypes = {
-    '.html': 'text/html',
-    '.js': 'application/javascript',
-    '.css': 'text/css',
-    '.json': 'application/json',
-    '.png': 'image/png',
-    '.jpg': 'image/jpeg',
-    '.gif': 'image/gif',
-    '.svg': 'image/svg+xml',
-    '.ico': 'image/x-icon'
-  };
-
+  // Try to serve the requested file
   fs.readFile(filePath, (err, data) => {
-    if (err) {
-      // Serve index.html for SPA routing
+    if (!err) {
+      const ext = path.extname(filePath).toLowerCase();
+      const contentType = MIME_TYPES[ext] || 'text/plain';
+      console.log(`✓ ${urlPath} (${ext})`);
+      res.writeHead(200, { 'Content-Type': contentType });
+      res.end(data);
+    } else if (isStatic) {
+      // Static files that don't exist should return 404
+      console.log(`✗ ${urlPath} (404 - not found)`);
+      res.writeHead(404, { 'Content-Type': 'text/plain' });
+      res.end('404 Not Found');
+    } else {
+      // For non-static routes, serve index.html (SPA routing)
       fs.readFile(path.join(DIST_DIR, 'index.html'), (err2, data2) => {
         if (err2) {
-          res.writeHead(404, { 'Content-Type': 'text/plain' });
-          res.end('404 Not Found');
+          console.log(`✗ ${urlPath} (index.html not found)`);
+          res.writeHead(500, { 'Content-Type': 'text/plain' });
+          res.end('Internal Server Error: index.html not found');
         } else {
+          console.log(`✓ ${urlPath} -> index.html (SPA routing)`);
           res.writeHead(200, { 'Content-Type': 'text/html' });
           res.end(data2);
         }
       });
-    } else {
-      res.writeHead(200, { 'Content-Type': mimeTypes[ext] || 'text/plain' });
-      res.end(data);
     }
   });
 });
 
 server.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on http://0.0.0.0:${PORT}`);
+  console.log(`\n✓ Server listening on http://0.0.0.0:${PORT}\n`);
 });
